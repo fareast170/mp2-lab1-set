@@ -12,6 +12,10 @@ static const int FAKE_INT = -1;
 static TBitField FAKE_BITFIELD(1);
 
 TBitField::TBitField(int len) {
+    if (len <= 0) {
+        throw "ERROR";
+    }
+
     BitLen = len;
     MemLen = BitLen / 32 + 1;
     pMem = new TELEM[MemLen];
@@ -48,22 +52,31 @@ TELEM TBitField::GetMemMask(const int n) const {
 
 // получить длину (к-во битов)
 int TBitField::GetLength(void) const {
-    return FAKE_INT;
+    return BitLen;
 }
 
 // установить бит
 void TBitField::SetBit(const int n) {
+    if ((n < 0) || (n >= BitLen)) {
+        throw "Error";
+    }
     pMem[GetMemIndex(n)] |= GetMemMask(n);
 }
 
 // очистить бит
 void TBitField::ClrBit(const int n) {
+    if ((n < 0) || (n >= BitLen)) {
+        throw "Error";
+    }
     pMem[GetMemIndex(n)] &= ~GetMemMask(n);
 }
 
 // получить значение бита
 int TBitField::GetBit(const int n) const {
-    return pMem[GetMemIndex(n)] & GetMemMask(n);
+    if ((n < 0) || (n >= BitLen)) {
+        throw "Error";
+    }
+    return GetMemMask(n) & pMem[GetMemIndex(n)];
 }
 
 // битовые операции
@@ -103,21 +116,25 @@ int TBitField::operator==(const TBitField &bf) const {
 
 // сравнение
 int TBitField::operator!=(const TBitField &bf) const {
-    return !(*this == bf);
+    int res = 1;
+    if (&bf == this) {
+        res = 0;
+    }
+    return res;
 }
 
 // операция "или"
 TBitField TBitField::operator|(const TBitField &bf) {
-    int i, len = BitLen;
+    int len = BitLen;
     if (bf.BitLen > len) {
         len = bf.BitLen;
     }
 
     TBitField temp(len);
-    for (i = 0; i < MemLen; i++) {
+    for (int i = 0; i < MemLen; i++) {
         temp.pMem[i] = pMem[i];
     }
-    for (i = 0; i < bf.MemLen; i++) {
+    for (int i = 0; i < bf.MemLen; i++) {
         temp.pMem[i] |= bf.pMem[i];
     }
 
@@ -126,16 +143,16 @@ TBitField TBitField::operator|(const TBitField &bf) {
 
 // операция "и"
 TBitField TBitField::operator&(const TBitField &bf) {
-    int i, len = BitLen;
+    int len = BitLen;
     if (bf.BitLen > len) {
         len = bf.BitLen;
     }
 
     TBitField temp(len);
-    for (i = 0; i < MemLen; i++) {
+    for (int i = 0; i < MemLen; i++) {
         temp.pMem[i] = pMem[i];
     }
-    for (i = 0; i < bf.MemLen; i++) {
+    for (int i = 0; i < bf.MemLen; i++) {
         temp.pMem[i] &= bf.pMem[i];
     }
 
